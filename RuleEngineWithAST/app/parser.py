@@ -4,14 +4,27 @@ from .models import Node
 def create_rule(rule_string):
     def parse_expression(expr):
         if isinstance(expr, ast.BoolOp):
-            if isinstance(expr.op, ast.And):
-                return Node("operator", "AND", parse_expression(expr.values[0]), parse_expression(expr.values[1]))
-            elif isinstance(expr.op, ast.Or):
-                return Node("operator", "OR", parse_expression(expr.values[0]), parse_expression(expr.values[1]))
+            # Process all values in the BoolOp, not just the first two
+            node = parse_expression(expr.values[0])
+            for value in expr.values[1:]:
+                if isinstance(expr.op, ast.And):
+                    node = Node("operator", "AND", node, parse_expression(value))
+                elif isinstance(expr.op, ast.Or):
+                    node = Node("operator", "OR", node, parse_expression(value))
+            return node
         elif isinstance(expr, ast.Compare):
             left = expr.left.id
             comparator = expr.ops[0]
-            right = expr.comparators[0].n
+
+            # Check if right-hand side is a number or a string
+            if isinstance(expr.comparators[0], ast.Num):  # Handles numeric values
+                right = expr.comparators[0].n
+            elif isinstance(expr.comparators[0], ast.Str):  # Handles string values
+                right = f"'{expr.comparators[0].s}'"
+            else:
+                raise ValueError("Unsupported comparator type")
+
+            # Determine the operator type
             op = ">"
             if isinstance(comparator, ast.Gt):
                 op = ">"

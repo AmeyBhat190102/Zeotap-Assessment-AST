@@ -1,5 +1,10 @@
+from .models import Node
+
 def evaluate_rule(rule, data):
     def evaluate(node):
+        if isinstance(node, dict):
+            node = Node(**node)
+
         print("Node type is : ",node.node_type)
         if node.node_type == "operand":
             key, op, value = node.value.split()
