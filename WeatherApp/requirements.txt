@@ -1,0 +1,7 @@
+Flask
+SQLAlchemy
+requests
+schedule
+apscheduler
+matplotlib
+streamlit

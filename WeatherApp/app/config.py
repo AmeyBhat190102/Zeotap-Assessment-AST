@@ -1,0 +1,3 @@
+import os
+
+OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '6faa6b061e77c2b1b23b671e1728ad97')
