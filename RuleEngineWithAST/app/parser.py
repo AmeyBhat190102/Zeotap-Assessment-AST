@@ -59,5 +59,4 @@ def create_rule(rule_string):
 
     # Validate the AST for attributes and functions
     validate_rule(ast_tree)
-
     return ast_tree

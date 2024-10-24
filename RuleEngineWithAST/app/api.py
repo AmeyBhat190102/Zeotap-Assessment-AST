@@ -3,6 +3,8 @@ from .parser import create_rule
 from .combiner import combine_rules
 from .evaluator import evaluate_rule
 from .models import Node
+from .db import insert_rule, update_rule, get_rule_by_id, init_db, create_rules_table
+
 import json
 
 # Initialize Flask app
@@ -10,6 +12,35 @@ app = Flask(__name__)
 
 # Define the API blueprint
 api_blueprint = Blueprint('api', __name__)
+
+@api_blueprint.route('/update_rule/<int:rule_id>', methods=['POST'])
+def update_rule_api(rule_id):
+    rule_string = request.json['rule_string']
+    user_data = request.json['user_data']
+
+    # Assuming the rule has been parsed into an AST and evaluated
+    ast_tree = create_rule(rule_string)
+    result = evaluate_rule(ast_tree, user_data)
+
+    # Update rule, user data, and result in the database
+    update_rule(rule_id, rule_string, user_data, result)
+
+    return jsonify({
+        "ast": ast_tree,
+        "result": result
+    })
+
+@api_blueprint.route('/get_rule/<int:rule_id>', methods=['GET'])
+def get_rule_api(rule_id):
+    rule = get_rule_by_id(rule_id)
+    if rule:
+        return jsonify({
+            "rule_id": rule[0],
+            "rule_string": rule[1],
+            "user_data": rule[2],
+            "result": rule[3]
+        })
+    return jsonify({"error": "Rule not found"}), 404
 
 @api_blueprint.route('/create_rule', methods=['POST'])
 def create_rule_api():
